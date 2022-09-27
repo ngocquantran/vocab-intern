@@ -1,13 +1,13 @@
 <component name="libraryTable">
-  <library name="Maven: org.hibernate.common:hibernate-commons-annotations:5.1.2.Final">
+  <library name="Maven: org.thymeleaf:thymeleaf:3.0.15.RELEASE">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/common/hibernate-commons-annotations/5.1.2.Final/hibernate-commons-annotations-5.1.2.Final.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/thymeleaf/thymeleaf/3.0.15.RELEASE/thymeleaf-3.0.15.RELEASE.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/common/hibernate-commons-annotations/5.1.2.Final/hibernate-commons-annotations-5.1.2.Final-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/thymeleaf/thymeleaf/3.0.15.RELEASE/thymeleaf-3.0.15.RELEASE-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/hibernate/common/hibernate-commons-annotations/5.1.2.Final/hibernate-commons-annotations-5.1.2.Final-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/thymeleaf/thymeleaf/3.0.15.RELEASE/thymeleaf-3.0.15.RELEASE-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

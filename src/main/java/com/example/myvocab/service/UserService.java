@@ -17,6 +17,7 @@ import net.bytebuddy.utility.RandomString;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -113,6 +114,7 @@ public class UserService {
         sendVerificationEmail(savedUser, siteURL);
 
     }
+
 
     public void handleUserSignUpException(SignUpRequest request) {
         Optional<Users> o_user = usersRepo.findByEmail(request.getEmail());
@@ -287,16 +289,27 @@ public class UserService {
         if (!Validation.isValidEmail(email)) {
             return;
         }
-        Optional<Users> o_user = usersRepo.findByEmail(email);
-        if (o_user.isEmpty()) {
+
+        try {
+            Users user = findUserByEmail(email);
+            String newPassword = RandomString.make(10);
+            user.setPassword(passwordEncoder.encode(newPassword));
+            Users saveUser = usersRepo.save(user);
+
+            sendResetPasswordEmail(saveUser, newPassword);
+        } catch (NotFoundException e) {
             return;
         }
-        Users user = o_user.get();
-        String newPassword = RandomString.make(10);
-        user.setPassword(passwordEncoder.encode(newPassword));
-        Users saveUser = usersRepo.save(user);
-
-        sendResetPasswordEmail(saveUser, newPassword);
+//        Optional<Users> o_user = usersRepo.findByEmail(email);
+//        if (o_user.isEmpty()) {
+//            return;
+//        }
+//        Users user = o_user.get();
+//        String newPassword = RandomString.make(10);
+//        user.setPassword(passwordEncoder.encode(newPassword));
+//        Users saveUser = usersRepo.save(user);
+//
+//        sendResetPasswordEmail(saveUser, newPassword);
     }
 
     public void sendResetPasswordEmail(Users user, String newPassword) throws MessagingException, UnsupportedEncodingException {
@@ -323,8 +336,17 @@ public class UserService {
 
     }
 
-    public boolean isUserOrderPendingExist(String userId){
-        return ordersRepo.existsByUser_IdAndStatus(userId,OrderStatus.PENDING);
+    public boolean isUserOrderPendingExist(String userId) {
+        return ordersRepo.existsByUser_IdAndStatus(userId, OrderStatus.PENDING);
+    }
+
+    @Cacheable(value = "user", key = "#email")
+    public Users findUserByEmail(String email) {
+        Optional<Users> o_user = usersRepo.findByEmail(email);
+        if (o_user.isEmpty()) {
+            throw new NotFoundException("Email chưa sử dụng");
+        }
+        return o_user.get();
     }
 
 

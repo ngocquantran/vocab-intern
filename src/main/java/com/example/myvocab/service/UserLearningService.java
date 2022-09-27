@@ -15,6 +15,8 @@ import com.example.myvocab.util.TimeStampFormat;
 import org.joda.time.DateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -202,7 +204,7 @@ public class UserLearningService {
         return vocabs;
     }
 
-    public boolean isUserCourseExist(Long courseId){
+    public boolean isUserCourseExist(Long courseId) {
         return userCourseRepo.existsByCourse_Id(courseId);
     }
 
@@ -237,7 +239,6 @@ public class UserLearningService {
 //    Render answer list for VocabTest (Choosing 4 options)
 
 
-
     public VocabTestDto renderVocabAnswers(VocabTestDto vocabTest, Long courseId) {
         int answerIndex = vocabTest.getAnswerIndex();  //get random answer index
         List<String> vocabs = vocabRepo.findByTopics_Course_Id(courseId)
@@ -246,7 +247,7 @@ public class UserLearningService {
                 .collect(Collectors.toList());  //get all vocabs of course
 
         //render list 4 answer which the right answer have index = answerIndex
-        List<String> wordLists = renderFourAnswerOption(answerIndex,vocabTest.getWord(),vocabs);
+        List<String> wordLists = renderFourAnswerOption(answerIndex, vocabTest.getWord(), vocabs);
         vocabTest.setVocabs(wordLists);
         return vocabTest;
     }
@@ -258,7 +259,7 @@ public class UserLearningService {
                 .stream()
                 .map(Vocab::getVnMeaning)
                 .collect(Collectors.toList());
-        List<String> vnLists = renderFourAnswerOption(answerIndex,vocabTest.getVnMeaning(),vnMeanings);
+        List<String> vnLists = renderFourAnswerOption(answerIndex, vocabTest.getVnMeaning(), vnMeanings);
 
         vocabTest.setVnMeanings(vnLists);
         return vocabTest;
@@ -615,8 +616,8 @@ public class UserLearningService {
 
 
     //COMMENT SECTION
-    public Comments createComment(UserTopic userTopic, CommentRequest request) {
 
+    public Comments createComment(UserTopic userTopic, CommentRequest request) {
         Optional<Comments> parentComment = commentsRepo.findByIdAndUserTopic_Topic_Id(request.getIdParent(), userTopic.getTopic().getId());
         if (request.getIdParent() != null && parentComment.isEmpty()) {
             throw new NotFoundException("Không tìm thấy comment có id = " + request.getIdParent() + "trong topic này");
@@ -629,12 +630,23 @@ public class UserLearningService {
                 .userTopic(userTopic)
                 .build();
 
+        return saveComment(comment);
+    }
+
+
+    @CachePut(value = "comment", key = "#comment.id")  //Cache new comment to redis
+    public Comments saveComment(Comments comment) {
         return commentsRepo.save(comment);
+    }
+
+    @Cacheable(value = "comment", key = "#topicId") // Cache list off comments by Topic
+    public List<Comments> selectAllCommentsByTopic(Long topicId) {
+        return commentsRepo.findByUserTopic_Topic_Id(topicId);
     }
 
     public List<CommentDto> getAllCommentsByTopic(Long topicId) {
         TimeStampFormat timeStampFormat = new TimeStampFormat();
-        List<Comments> comments = commentsRepo.findByUserTopic_Topic_Id(topicId);
+        List<Comments> comments = selectAllCommentsByTopic(topicId);
         List<CommentDto> commentDtos = comments.stream()
                 .map(c -> new CommentDto(
                         c.getId(),
@@ -720,6 +732,7 @@ public class UserLearningService {
 
 //    Helper Class
 
+    @Cacheable(value = "topic",key = "#topicId")
     public Topic isTopicExist(Long topicId) {
         Optional<Topic> o_topic = topicRepo.findTopicById(topicId, Topic.class);
         if (!o_topic.isPresent()) {
@@ -727,6 +740,7 @@ public class UserLearningService {
         }
         return o_topic.get();
     }
+
 
     public Users isUserExist(String userId) {
         Optional<Users> o_user = usersRepo.findById(userId);
@@ -736,6 +750,7 @@ public class UserLearningService {
         return o_user.get();
     }
 
+    @Cacheable(value = "course",key = "#courseId")
     public Course isCourseExist(Long courseId) {
         Optional<Course> o_course = courseRepo.findCourseById(courseId);
         if (!o_course.isPresent()) {
@@ -744,6 +759,7 @@ public class UserLearningService {
         return o_course.get();
     }
 
+    @Cacheable(value = "vocab",key = "#vocabId")
     public Vocab isVocabExist(Long vocabId) {
         Optional<Vocab> o_vocab = vocabRepo.findById(vocabId);
         if (o_vocab.isEmpty()) {
@@ -760,6 +776,7 @@ public class UserLearningService {
         return o_userTopic.get();
     }
 
+    @Cacheable(value = "sentence",key = "#sentenceId")
     public Sentence isSentenceExist(Long sentenceId) {
         Optional<Sentence> o_sentence = sentenceRepo.findById(sentenceId);
         if (o_sentence.isEmpty()) {
