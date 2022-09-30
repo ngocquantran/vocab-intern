@@ -1,6 +1,8 @@
 package com.example.myvocab.dto;
 
-public interface VocabTestResultDto {
+import java.io.Serializable;
+
+public interface VocabTestResultDto extends Serializable {
     Long getId();
 
     boolean isStatus();

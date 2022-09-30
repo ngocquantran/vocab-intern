@@ -8,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "course",
         indexes = @Index(name = "status", columnList = "status"))
-public class Course {
+public class Course implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

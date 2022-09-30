@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -633,13 +634,11 @@ public class UserLearningService {
         return saveComment(comment);
     }
 
-
     @CachePut(value = "comment", key = "#comment.id")  //Cache new comment to redis
     public Comments saveComment(Comments comment) {
         return commentsRepo.save(comment);
     }
 
-    @Cacheable(value = "comment", key = "#topicId") // Cache list off comments by Topic
     public List<Comments> selectAllCommentsByTopic(Long topicId) {
         return commentsRepo.findByUserTopic_Topic_Id(topicId);
     }
@@ -732,7 +731,7 @@ public class UserLearningService {
 
 //    Helper Class
 
-    @Cacheable(value = "topic",key = "#topicId")
+    @Cacheable(value = "topic", key = "#topicId")
     public Topic isTopicExist(Long topicId) {
         Optional<Topic> o_topic = topicRepo.findTopicById(topicId, Topic.class);
         if (!o_topic.isPresent()) {
@@ -750,7 +749,7 @@ public class UserLearningService {
         return o_user.get();
     }
 
-    @Cacheable(value = "course",key = "#courseId")
+
     public Course isCourseExist(Long courseId) {
         Optional<Course> o_course = courseRepo.findCourseById(courseId);
         if (!o_course.isPresent()) {
@@ -759,7 +758,7 @@ public class UserLearningService {
         return o_course.get();
     }
 
-    @Cacheable(value = "vocab",key = "#vocabId")
+    @Cacheable(value = "vocab", key = "#vocabId")
     public Vocab isVocabExist(Long vocabId) {
         Optional<Vocab> o_vocab = vocabRepo.findById(vocabId);
         if (o_vocab.isEmpty()) {
@@ -776,7 +775,7 @@ public class UserLearningService {
         return o_userTopic.get();
     }
 
-    @Cacheable(value = "sentence",key = "#sentenceId")
+    @Cacheable(value = "sentence", key = "#sentenceId")
     public Sentence isSentenceExist(Long sentenceId) {
         Optional<Sentence> o_sentence = sentenceRepo.findById(sentenceId);
         if (o_sentence.isEmpty()) {

@@ -56,18 +56,23 @@ public class WebController {
 
         List<CourseCategory> categories = viewService.getAllCategory();
         model.addAttribute("categories", categories);
+        System.out.println(categories.toString());
 
         List<Levels> levels = viewService.getAllLevels();
         model.addAttribute("levels", levels);
+        System.out.println(levels.toString());
 
         model.addAttribute("cateId", categoryId);
+        System.out.println(categoryId);
 
         List<CourseByCategoryDto> groupsWithCourses = viewService.getAllCourseWithGroupByCategory(categoryId);
         model.addAttribute("groupsWithCourses", groupsWithCourses);
+        System.out.println(groupsWithCourses.toString());
 
         if (userDetailsCustom != null) {
             List<UserCourseInfo> userCourses = userService.getUserCourseByUserAndCategory(userDetailsCustom.getUser().getId(), categoryId);
             model.addAttribute("userCourses", userCourses);
+            System.out.println(userCourses);
         }
         return "web/index";
     }

@@ -259,6 +259,7 @@ public class UserService {
     }
 
     public void checkExpiredUserRole(String userEmail) {
+
         Optional<Users> o_user = usersRepo.findByEmail(userEmail);
         if (o_user.isPresent()) {
             Users user = o_user.get();

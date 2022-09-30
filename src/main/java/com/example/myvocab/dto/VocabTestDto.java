@@ -5,13 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
 
 @Data
 @AllArgsConstructor
 @Builder
-public class VocabTestDto {
+public class VocabTestDto implements Serializable {
     private Long id;
     private String word;
     private String img;

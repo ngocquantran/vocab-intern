@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Objects;
 
 @Data
@@ -17,7 +18,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "course_category",
         indexes = @Index(name = "title", columnList = "title", unique = true))
-public class CourseCategory {
+public class CourseCategory implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

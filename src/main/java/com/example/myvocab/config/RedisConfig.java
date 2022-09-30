@@ -10,8 +10,8 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-//@Configuration
-//@EnableRedisRepositories
+@Configuration
+@EnableRedisRepositories
 public class RedisConfig {
     @Value("${spring.redis.host}")
     private String redisHostName;
@@ -19,7 +19,7 @@ public class RedisConfig {
     @Value("${spring.redis.port}")
     private Integer redisPort;
 
-//    @Bean
+    @Bean
     public JedisConnectionFactory jedisConnectionFactory(){
         RedisStandaloneConfiguration redisConfig=new RedisStandaloneConfiguration();
         redisConfig.setHostName(redisHostName);
@@ -27,7 +27,7 @@ public class RedisConfig {
         return new JedisConnectionFactory(redisConfig);
     }
 
-//    @Bean
+    @Bean
     public RedisTemplate<String,Object> redisTemplate(){
         RedisTemplate<String, Object> redisTemplate=new RedisTemplate<>();
         redisTemplate.setConnectionFactory(jedisConnectionFactory());

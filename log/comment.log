@@ -1,3 +1,1 @@
-2022-09-27 01:10:07.615 INFO  [http-nio-8080-exec-6] comment - Comment: lalala; userId: e92eedc1-e7a8-4fb8-94d1-6245b8942d22; topicId: 1
-2022-09-27 01:13:55.635 INFO  [http-nio-8080-exec-10] comment - Comment: thử redis; userId: e92eedc1-e7a8-4fb8-94d1-6245b8942d22; topicId: 1
-2022-09-27 01:26:00.621 INFO  [http-nio-8080-exec-8] comment - Comment: thử; userId: e92eedc1-e7a8-4fb8-94d1-6245b8942d22; topicId: 1
+2022-09-28 12:56:32.754 INFO  [http-nio-8080-exec-5] comment - Comment: lần 2; userId: e92eedc1-e7a8-4fb8-94d1-6245b8942d22; topicId: 1

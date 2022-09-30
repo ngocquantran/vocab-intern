@@ -7,6 +7,7 @@ import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import javax.transaction.Transactional;
+import java.io.Serializable;
 import java.util.*;
 
 @Getter
@@ -16,7 +17,7 @@ import java.util.*;
 @Builder
 @Entity
 @Table(name = "topic")
-public class Topic {
+public class Topic implements Serializable {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

@@ -47,7 +47,7 @@ public class MyvocabApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-       // sheetDataService.renderVocabFromGoogleSheetToDatabase();
+        //sheetDataService.renderVocabFromGoogleSheetToDatabase();
 
     }
 

@@ -9,10 +9,10 @@ import com.example.myvocab.repo.*;
 import com.example.myvocab.request.CourseAddRequest;
 import com.example.myvocab.request.TopicAddRequest;
 import com.example.myvocab.request.VocabAddRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,6 +67,9 @@ public class AdminService {
 
     @Autowired
     private UserCourseRepo userCourseRepo;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     public PageDto getListOfDataByPage(int pageNum, Page<?> page) {
         PageDto pageDto = PageDto.builder()
@@ -168,12 +172,35 @@ public class AdminService {
         courseRepo.save(savedCourse);
     }
 
-    public void handleEditVocabRequest(Long vocabId, VocabAddRequest request) {
-        Optional<Vocab> o_vocab = vocabRepo.findById(vocabId);
-        if (o_vocab.isEmpty()) {
-            throw new NotFoundException("Không tìm thấy vocab id" + vocabId);
+    public Vocab findVocabById(Long vocabId) {
+        Vocab vocab = null;
+        String cacheKey = "vocab" + vocabId;
+        //First check from Redis, then check from Database
+        vocab = (Vocab) redisTemplate.opsForValue().get(cacheKey);
+        if (vocab == null) {
+            //no exist in cache, find in database
+            Optional<Vocab> o_vocab = vocabRepo.findById(vocabId);
+
+            //not exist in database
+            if (o_vocab.isEmpty()) {
+                throw new NotFoundException("Không tìm thấy vocab id" + vocabId);
+            } else {
+                vocab = o_vocab.get();
+                // if exist in database but not in cache, need to write to cache
+                redisTemplate.opsForValue().set(cacheKey, vocab, 60, TimeUnit.SECONDS);
+            }
+
         }
-        Vocab vocab = o_vocab.get();
+        return vocab;
+    }
+
+    public void handleEditVocabRequest(Long vocabId, VocabAddRequest request) {
+//        Optional<Vocab> o_vocab = vocabRepo.findById(vocabId);
+//        if (o_vocab.isEmpty()) {
+//            throw new NotFoundException("Không tìm thấy vocab id" + vocabId);
+//        }
+//        Vocab vocab = o_vocab.get();
+        Vocab vocab = findVocabById(vocabId);
         vocab.setWord(request.getWord());
         vocab.setType(request.getType());
         vocab.setPhonetic(request.getPhonetic());
@@ -181,7 +208,12 @@ public class AdminService {
         vocab.setVnMeaning(request.getVnMeaning());
         vocab.setEnSentence(request.getEnSentence());
         vocab.setVnSentence(request.getVnSentence());
-        vocabRepo.save(vocab);
+
+        Vocab updatedVocab = vocabRepo.save(vocab);
+
+
+        String cacheKey = "vocab" + vocabId;
+        redisTemplate.opsForValue().set(cacheKey, updatedVocab);
     }
 
     public String handleUploadFile(MultipartFile file, String uploadDir, String name) {
@@ -215,7 +247,11 @@ public class AdminService {
         savedVocab.setAudio("/upload/mp3/word/pronounce/" + audioURL);
         savedVocab.setSenAudio("/upload/mp3/word/example/" + senAudioURL);
 
-        vocabRepo.save(savedVocab);
+        Vocab newVocab = vocabRepo.save(savedVocab);
+        if (newVocab != null) {
+            String cacheKey = "user" + newVocab.getId();
+            redisTemplate.opsForValue().set(cacheKey, newVocab);
+        }
 
     }
 
@@ -255,6 +291,7 @@ public class AdminService {
         }
         topicRepo.save(topic);
     }
+
 
     public void deleteTopic(Long topicId) {
         Optional<Topic> o_topic = topicRepo.findById(topicId);

@@ -12,6 +12,7 @@ import com.example.myvocab.model.enummodel.CourseStatus;
 import com.example.myvocab.model.enummodel.OrderStatus;
 import com.example.myvocab.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
@@ -62,6 +63,7 @@ public class ViewService {
 
     }
 
+    @Cacheable(value = "course", key = "#id")
     public Course getCourseById(Long id) {
         Optional<Course> course = courseRepo.findCourseById(id);
         if (!course.isPresent()) {
